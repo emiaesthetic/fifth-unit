@@ -1,46 +1,37 @@
 'use strict';
 
-// Восстановление правильного порядка книг
-const misplacementBookIndexes = [4, 1, 2, 3, 5, 6];
-const allItemBooks = document.querySelectorAll('.item');
+const fixLayout = () => {
+  const getBook = (prefixBook) =>
+    document.querySelector(`.item--${prefixBook}`);
 
-const books = {};
-misplacementBookIndexes.forEach(
-    (item, index) => (books[item] = allItemBooks[index]),
-);
+  const getChaptersBook = (prefixBook) =>
+    document.querySelectorAll(`.props__item--${prefixBook}`);
 
-const booksList = document.querySelector('.items');
-booksList.append(...Object.values(books));
+  const getNumberOrLetter = (text) => {
+    const secondItem = text.split(' ')[1];
+    return parseInt(secondItem) || secondItem[0];
+  };
 
-// Исправление глав в книгах
-const prefixes = ['one', 'two', 'three', 'four', 'five', 'six'];
+  const booksList = document.querySelector('.items');
+  const prefixes = ['one', 'two', 'three', 'four', 'five', 'six'];
 
-const booksContent = [];
-prefixes.forEach((prefixBook) => {
-  const content = document.querySelector(`.item--${prefixBook} .content`);
-  booksContent.push(content);
-});
+  prefixes.forEach((prefix) => {
+    const book = getBook(prefix);
+    const contentBook = book.querySelector('.content');
 
-const getChaptersBook = (prefixBook) =>
-  document.querySelectorAll(`.props__item--${prefixBook}`);
+    const chaptersBook = [...getChaptersBook(prefix)];
+    chaptersBook.sort((a, b) => {
+      a = getNumberOrLetter(a.textContent);
+      b = getNumberOrLetter(b.textContent);
+      return a - b || String(a).localeCompare(b);
+    });
 
-const getChapterNumberOrLetter = (text) => {
-  const secondItem = text.split(' ')[1];
-  return parseInt(secondItem) || secondItem;
-};
-
-prefixes.forEach((prefixBook, index) => {
-  const chaptersBook = [...getChaptersBook(prefixBook)];
-
-  chaptersBook.sort((a, b) => {
-    a = getChapterNumberOrLetter(a.textContent);
-    b = getChapterNumberOrLetter(b.textContent);
-    return (a - b) || a.localeCompare(b);
+    contentBook.append(...chaptersBook);
+    booksList.append(book);
   });
 
-  booksContent[index].append(...chaptersBook);
-});
+  const advertising = document.querySelector('.ads');
+  advertising.remove();
+};
 
-// Удаление рекламы
-const advertising = document.querySelector('.ads');
-advertising.remove();
+fixLayout();
